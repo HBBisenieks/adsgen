@@ -1,0 +1,14 @@
+MANIFEST.in
+adsgen.cfg
+setup.py
+adsgen/__init__.py
+adsgen/decode.py
+adsgen/hrs_pw.py
+adsgen/hrs_student_utils.py
+adsgen.egg-info/PKG-INFO
+adsgen.egg-info/SOURCES.txt
+adsgen.egg-info/dependency_links.txt
+adsgen.egg-info/entry_points.txt
+adsgen.egg-info/not-zip-safe
+adsgen.egg-info/requires.txt
+adsgen.egg-info/top_level.txt
