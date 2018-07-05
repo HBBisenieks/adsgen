@@ -106,7 +106,7 @@ def handleArguments(args):
     parser.add_argument("infile",type = str,help = "CSV input file - fields must be in order: ImportID,Last,First,StudentID,ClassYear,Address-ImportID (ClassYear is either a 4-digit integer for students or FAC|STAFF|ADMIN for employees)")
     parser.add_argument('-o','--outfile',default = '',type = str,help = "Path to output file. If -o is not specified, output file will be named [DATE]-new-users.csv where [DATE] is the current ISO 8601 date (see xkcd 1179).")
     parser.add_argument('--noheader',action = "store_true",help = "Use only if the input file contains no header row. Default behavior is to skip the first row of the input file.")
-    parser.add_argument('--silent',action = "store_true",help = "Run silently. Default behavior is to print contents of outfile to STDOUT as well as writing it to file. Note: even with --silent specified, duplicate warnings will still print.")
+    parser.add_argument('--silent',action = "store_true",help = "Run silently. Default behavior is to print contents of outfile to STDOUT as well as writing it to file. Note: even with --silent specified, duplicate user warnings and username collisions will still print.")
     parser.add_argument('--nowrite',action = "store_true",help = "Do not write output to a file.")
 
     return parser.parse_args()
