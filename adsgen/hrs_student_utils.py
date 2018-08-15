@@ -61,7 +61,10 @@ def gOrg(classYear):
         if classYear[0].upper() == 'F':
             return "/Staff/Faculty"
         elif classYear[0].upper() == 'A':
-            return "/Staff/School-Admin"
+            if classYear[1].upper() == 'S':
+                return "/Staff/ASP"
+            else:
+                return "/Staff/School-Admin"
         else:
             return "/Staff"
 
