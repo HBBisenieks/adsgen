@@ -22,7 +22,7 @@ def lsearch(connection, org, query):
     return connection.search_s(org, ldap.SCOPE_SUBTREE, query)
 
 
-def checkDuplicate(connection, org, tempList, importID):
+def checkDuplicateAccount(connection, org, tempList, importID):
     for row in tempList:
         if len(row) > 0:
             if row[0] == importID:
@@ -44,7 +44,14 @@ def adOrg(classYear):
 def localDup(tempList, username):
     for row in tempList:
         if len(row) > 0:
-            return row[5] == username
+            if row[5] == username:
+                return True
+    return False
+
+
+def duplicateUsername(username, connection, org, tempList):
+    query = "(samaccountname=" + username + ")"
+    return (lsearch(connection, org, query) or localDup(tempList, username))
 
 
 def checkCollision(connection, tempList, first, last, classYear, org):
@@ -55,28 +62,23 @@ def checkCollision(connection, tempList, first, last, classYear, org):
     if classYear.isdigit():
         i = 1
         username = lFirst + lLast[:i] + str(classYear)
-        query = "(samaccountname=" + username + ")"
-        while i <= len(lLast) and (lsearch(connection, org, query)
-                                   or localDup(tempList, username)):
+        while i <= len(lLast) and duplicateUsername(username, connection,
+                                                    org, tempList):
             i += 1
             username = lFirst + lLast[:i] + str(classYear)
-            query = "(samaccountname=" + username + ")"
             collision = True
     else:
         i = 1
         username = lFirst[:i] + lLast
-        query = "(samaccountname=" + username + ")"
-        while i <= len(lLast) and (lsearch(connection, org, query)
-                                   or localDup(tempList, username)):
+        while i <= len(lLast) and duplicateUsername(username, connection,
+                                                    org, tempList):
             i += 1
             username = lFirst[:i] + lLast
-            query = "(samaccountname=" + username + ")"
             collision = True
 
-            if collision:
-                name = first + " " + last
-                print ("Username collision for " + name + ". Username is "
-                       + username)
+    if collision:
+        name = first + " " + last
+        print ("Username collision for " + name + ". Username is " + username)
 
     return username
 
@@ -94,7 +96,7 @@ def generateLine(row, tempList, connection):
     org = adOrg(row[4])
     addr = row[5]
     name = first + " " + last
-    if checkDuplicate(connection, org, tempList, importID):
+    if checkDuplicateAccount(connection, org, tempList, importID):
         print "Duplicate found for " + name + " with Import ID " + importID
     else:
         username = checkCollision(connection, tempList, first, last, classYear,
