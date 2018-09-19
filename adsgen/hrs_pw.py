@@ -1,49 +1,51 @@
 import random
 
-SYMBOLS = ['!','@','#','$','%','^','&','*','(',')']
+SYMBOLS = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')']
+
 
 def insertSymbols(password):
     char_list = list(password)
     char_list[random.choice(range(len(char_list)))] = random.choice(SYMBOLS)
     return ''.join(char_list)
 
-def hrspw(words = 2,symbols = 0,prefix = '',postfix = ''):
+
+def hrspw(words=2, symbols=0, prefix='', postfix=''):
     wordList = ['Anna',
-        'ASP',
-        'Becks',
-        'BigToy',
-        'Caravan',
-        'citizenship',
-        'Colla',
-        'diversity',
-        'excellence',
-        'Expos',
-        'FallOut',
-        'Gatehouse',
-        'gold',
-        'green',
-        'HeadsUp',
-        'Jayhawk',
-        'Josiah',
-        'Lincoln',
-        'Loop',
-        'Lower',
-        'Memoir',
-        'MEW',
-        'Middle',
-        'Nods',
-        'Pavilion',
-        'Read',
-        'Rotunda',
-        'Royce',
-        'SEP',
-        'stairs',
-        'treehouse',
-        'Tuffy',
-        'Turkeys',
-        'Upper',
-        'Voce',
-        'WL',]
+                'ASP',
+                'Becks',
+                'BigToy',
+                'Caravan',
+                'citizenship',
+                'Colla',
+                'diversity',
+                'excellence',
+                'Expos',
+                'FallOut',
+                'Gatehouse',
+                'gold',
+                'green',
+                'HeadsUp',
+                'Jayhawk',
+                'Josiah',
+                'Lincoln',
+                'Loop',
+                'Lower',
+                'Memoir',
+                'MEW',
+                'Middle',
+                'Nods',
+                'Pavilion',
+                'Read',
+                'Rotunda',
+                'Royce',
+                'SEP',
+                'stairs',
+                'treehouse',
+                'Tuffy',
+                'Turkeys',
+                'Upper',
+                'Voce',
+                'WL']
 
     password = prefix
 
