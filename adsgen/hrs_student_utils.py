@@ -3,6 +3,7 @@
 
 from datetime import date
 
+
 def grade(classYear):
     # turns a 4-digit year classYear and returns
     # a numeric grade for the current school year
@@ -12,6 +13,7 @@ def grade(classYear):
         year += 1
     return (12 - (int(classYear) - year))
 
+
 def division(grade):
     # returns a string, Division, based on numeric grade
     if grade > 8:
@@ -20,6 +22,7 @@ def division(grade):
         return "Middle"
     else:
         return "Lower"
+
 
 def readableGrade(grade):
     # returns a string, readableGrade, based on
@@ -36,6 +39,7 @@ def readableGrade(grade):
     else:
         return "Kingergarten"
 
+
 def studentOrg(classYear):
     # takes a 4-digit year and returns a string
     # for G Suite organizational units
@@ -45,14 +49,17 @@ def studentOrg(classYear):
     org = "/Student/" + d + "/" + r + "/ClassOf" + str(classYear)
     return org
 
+
 def studentPath(classYear):
     # takes a 4-digit year and returns a valid
     # ldap path
     g = grade(classYear)
     d = division(g)
     r = readableGrade(g)
-    path = "ou=ClassOf" + str(classYear) + ",ou=" + r + ",ou=" + d + ",ou=Students"
+    path = "ou=ClassOf" + str(classYear) + ",ou=" + r + ",ou=" + d + """
+            ,ou=Students"""
     return path
+
 
 def gOrg(classYear):
     if classYear.isdigit():
@@ -67,6 +74,7 @@ def gOrg(classYear):
                 return "/Staff/School-Admin"
         else:
             return "/Staff"
+
 
 def adPath(classYear):
     base = ",dc=headroyce,dc=org"
