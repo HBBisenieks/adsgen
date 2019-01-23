@@ -177,9 +177,6 @@ def parseConfig():
 
 
 def main(args=None):
-    #    s = "ldaps://hrsads01.headroyce.org"
-    #    u = "script@headroyce.org"
-    #    p = "serverUsagecat0"
     s, u, p = parseConfig()
 
     if args is None:
