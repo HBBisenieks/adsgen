@@ -3,11 +3,11 @@ from re import sub
 
 
 def decode(str):
-    return unidecode(unicode(str, 'utf_8'))
+    return unidecode(str(str))
 
 
 def sanitize(str):
-    return sub('[ \'-]', '', str)
+    return sub('[ \']', '', str)
 
 
 def sane(str):

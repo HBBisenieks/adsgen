@@ -55,8 +55,8 @@ def duplicateUsername(username, connection, org, tempList):
 
 
 def checkCollision(connection, tempList, first, last, classYear, org):
-    lFirst = first.lower()
-    lLast = last.lower()
+    lFirst = sane(first.lower())
+    lLast = sane(last.lower())
     collision = False
 
     if classYear.isdigit():
@@ -78,7 +78,7 @@ def checkCollision(connection, tempList, first, last, classYear, org):
 
     if collision:
         name = first + " " + last
-        print ("Username collision for " + name + ". Username is " + username)
+        print("Username collision for " + name + ". Username is " + username)
 
     return username
 
@@ -89,15 +89,15 @@ def generateLine(row, tempList, connection):
     # SamAccountName,Password,ADDR-ImportID,ContactType,Email,Path,Org
     line = []
     importID = row[0]
-    last = sane(row[1])
-    first = sane(row[2])
+    last = row[1]
+    first = row[2]
     id = row[3]
     classYear = row[4]
     org = adOrg(row[4])
     addr = row[5]
     name = first + " " + last
     if checkDuplicateAccount(connection, org, tempList, importID):
-        print "Duplicate found for " + name + " with Import ID " + importID
+        print("Duplicate found for " + name + " with Import ID " + importID)
     else:
         username = checkCollision(connection, tempList, first, last, classYear,
                                   org)
@@ -169,8 +169,8 @@ def parseConfig():
     p = config.get('server', 'password')
 
     if not s and u and p:
-        print """Invalid config. Please ensure that settings are correct in
-            /etc/adsgen.cfg"""
+        print("""Invalid config. Please ensure that settings are correct in
+            /etc/adsgen.cfg""")
         sys.exit(1)
     else:
         return s, u, p
@@ -196,7 +196,7 @@ def main(args=None):
 
     connection.unbind_s()
     if not options.silent:
-        print tempList
+        print(tempList)
 
     if not options.nowrite:
         outfile = fileName(options.outfile)
