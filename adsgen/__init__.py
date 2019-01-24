@@ -1,14 +1,19 @@
+from __future__ import print_function
+from future import standard_library
+from builtins import next
+from builtins import str
 import ldap
 import sys
 import csv
 import argparse
-import ConfigParser
+import configparser
 import io
 from datetime import date
 from adsgen.decode import sane
 from adsgen.hrs_student_utils import gOrg
 from adsgen.hrs_student_utils import adPath
 from adsgen.hrs_pw import hrspw
+standard_library.install_aliases()
 
 
 def bind(server, username, password):
@@ -161,7 +166,7 @@ def parseConfig():
     with open("/etc/adsgen.cfg") as f:
         cf = f.read()
 
-    config = ConfigParser.RawConfigParser(allow_no_value=True)
+    config = configparser.RawConfigParser(allow_no_value=True)
     config.readfp(io.BytesIO(cf))
 
     s = config.get('server', 'address')

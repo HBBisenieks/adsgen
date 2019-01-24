@@ -1,7 +1,9 @@
+from __future__ import print_function
+from builtins import str
+from datetime import date
+
 # A set of utilities for working with student data
 # during account creation
-
-from datetime import date
 
 
 def grade(classYear):
@@ -56,8 +58,8 @@ def studentPath(classYear):
     g = grade(classYear)
     d = division(g)
     r = readableGrade(g)
-    path = "ou=ClassOf" + str(classYear) + ",ou=" + r + ",ou=" + d + """
-            ,ou=Students"""
+    y = str(classYear)
+    path = "ou=ClassOf" + y + ",ou=" + r + ",ou=" + d + ",ou=Students"
     return path
 
 

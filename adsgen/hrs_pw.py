@@ -1,12 +1,15 @@
+from __future__ import print_function
+from builtins import str
+from builtins import range
 import random
 
 SYMBOLS = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')']
 
 
 def insertSymbols(password):
-    char_list = list(password)
-    char_list[random.choice(range(len(char_list)))] = random.choice(SYMBOLS)
-    return ''.join(char_list)
+    char_l = list(password)
+    char_l[random.choice(list(range(len(char_l))))] = random.choice(SYMBOLS)
+    return ''.join(char_l)
 
 
 def hrspw(words=2, symbols=0, prefix='', postfix=''):
