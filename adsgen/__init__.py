@@ -4,7 +4,6 @@ import sys
 import csv
 import argparse
 import configparser
-import io
 from datetime import date
 from adsgen.decode import sane
 from adsgen.hrs_student_utils import gOrg
