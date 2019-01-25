@@ -159,11 +159,6 @@ def fileName(outfile):
 
 
 def parseConfig():
-    # with open("/etc/adsgen.cfg") as f:
-        # cf = f.read()
-
-    # config = configparser.RawConfigParser(allow_no_value=True)
-    # config.readfp(io.BytesIO(cf))
     config = configparser.ConfigParser()
     config.read('/etc/adsgen.cfg')
 
