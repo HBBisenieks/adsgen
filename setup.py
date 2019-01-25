@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='adsgen',
-    version='0.4.1',
+    version='1.0.0',
     description="""Generate usernames and other account info from Blackbaud
                 exports""",
     url="https://headroyce.org",
