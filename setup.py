@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='adsgen',
-    version='0.3.0',
+    version='0.4.0',
     description="""Generate usernames and other account info from Blackbaud
                 exports""",
     url="https://headroyce.org",
@@ -22,4 +22,9 @@ setup(
     },
     include_package_data=True,
     data_files=[('/etc', ['adsgen.cfg'])],
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+    ],
 )

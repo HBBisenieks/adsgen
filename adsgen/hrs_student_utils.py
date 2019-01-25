@@ -1,5 +1,3 @@
-from __future__ import print_function
-from builtins import str
 from datetime import date
 
 # A set of utilities for working with student data
