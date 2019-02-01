@@ -197,7 +197,7 @@ def main(args=None):
 
     if not options.nowrite:
         outfile = fileName(options.outfile)
-        with open(outfile, 'wb') as f:
+        with open(outfile, 'w') as f:
             writer = csv.writer(f)
             writer.writerows(tempList)
 
