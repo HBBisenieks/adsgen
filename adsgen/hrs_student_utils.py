@@ -41,12 +41,16 @@ def readableGrade(grade):
 
 
 def insertDelimiter(s, d='/'):
-    if s[-1:] == d:
+    # appends a delimiting string, d, onto a string, s, if
+    # d is not already present at the end of s
+    if s[-len(d):] == d:
         return s
     return s + d
 
 
 def path(classYear, schema, delimiter):
+    # generalized method for returning an LDAP/Google path
+    # given a class year, schema, and delimiter
     structure = schema['student_sub_structure'].split(',')
     g = grade(classYear)
     if 'division' in structure:
@@ -55,7 +59,12 @@ def path(classYear, schema, delimiter):
         rGrade = readableGrade(g)
     if 'class' in structure:
         classOf = schema['class_prefix'] + str(classYear)
-    p = delimiter
+
+    if delimiter[0] == ',':
+        p = delimiter[1:]
+    else:
+        p = delimiter
+
     for element in structure:
         p = insertDelimiter(delimiter)
         if element == 'division':
@@ -67,47 +76,9 @@ def path(classYear, schema, delimiter):
     return p
 
 
-def studentOrg(classYear, gSchema):
-    # takes a 4-digit year and returns a string
-    # for G Suite organizational units
-    structure = gSchema['student_sub_structure'].split(',')
-    g = grade(classYear)
-    if "division" in structure:
-        d = division(g)
-    if 'grade' in structure:
-        r = readableGrade(g)
-    if 'class' in structure:
-        c = gSchema['class_prefix'] + str(classYear)
-    org = '/'
-    for e in structure:
-        org = insertDelimiter(org)
-        if e == 'division':
-            org = org + d
-        if e == 'grade':
-            org = org + r
-        if e == 'class':
-            org = org + c
-    return org
-
-
-def studentPath(classYear, aSchema):
-    # takes a 4-digit year and returns a valid
-    # ldap path
-    structure = aSchema['student_sub_structure'].split(',')
-    g = grade(classYear)
-    if 'division' in structure:
-        d = division(g)
-    if 'grade' in structure:
-        r = readableGrade(g)
-    if 'class' in structure:
-        y = str(classYear)
-    path = "ou=ClassOf" + y + ",ou=" + r + ",ou=" + d + ",ou=Students"
-    return path
-
-
 def gOrg(classYear, gSchema):
     if classYear.isdigit():
-        return studentOrg(classYear, gSchema)
+        return path(classYear, gSchema, '/')
     else:
         for div in gSchema['employee_sub'].split(','):
             if classYear[:2].upper() == div[:2].upper():
@@ -117,6 +88,6 @@ def gOrg(classYear, gSchema):
 def adPath(classYear, aSchema):
     base = aSchema['domain']
     if classYear.isdigit():
-        return studentPath(classYear) + base
+        return path(classYear, aSchema, ',ou=') + base
     else:
         return aSchema['employee_base'] + base

@@ -83,7 +83,7 @@ def checkCollision(connection, tempList, first, last, classYear, org):
     return username
 
 
-def generateLine(row, tempList, connection):
+def generateLine(row, tempList, connection, gSchema, aSchema):
     # Row is: ImportID,Last,First,ID,ClassYear,AddrImportID
     # Returns a list in the form: ImportID,Surname,GivenName,Name,StudId,
     # SamAccountName,Password,ADDR-ImportID,ContactType,Email,Path,Org
@@ -93,17 +93,18 @@ def generateLine(row, tempList, connection):
     first = row[2]
     id = row[3]
     classYear = row[4]
-    org = adOrg(row[4])
+    org = adOrg(row[4], aSchema)
     addr = row[5]
     name = first + " " + last
+    gDomain = gSchema['domain']
     if checkDuplicateAccount(connection, org, tempList, importID):
         print("Duplicate found for " + name + " with Import ID " + importID)
     else:
         username = checkCollision(connection, tempList, first, last, classYear,
                                   org)
-        email = username + "@headroyce.org"
-        org = gOrg(classYear)
-        path = adPath(classYear)
+        email = username + gDomain
+        org = gOrg(classYear, gSchema)
+        path = adPath(classYear, aSchema)
         password = hrspw(2, 1)
         line = [importID, last, first, name, id, username, password, addr,
                 "E-Mail", email, path, org]
@@ -164,17 +165,19 @@ def parseConfig():
     s = config.get('server', 'address')
     u = config.get('server', 'username')
     p = config.get('server', 'password')
+    gSchema = config['google']
+    aSchema = config['ad']
 
-    if not s and u and p:
+    if not s and u and p and gSchema and aSchema:
         print("""Invalid config. Please ensure that settings are correct in
             /etc/adsgen.cfg""")
         sys.exit(1)
     else:
-        return s, u, p
+        return s, u, p, gSchema, aSchema
 
 
 def main(args=None):
-    s, u, p = parseConfig()
+    s, u, p, gSchema, aSchema = parseConfig()
 
     if args is None:
         args = sys.argv[1:]
@@ -189,7 +192,8 @@ def main(args=None):
         if not options.noheader:
             next(reader, None)
         for row in reader:
-            tempList.append(generateLine(row, tempList, connection))
+            tempList.append(generateLine(row, tempList, connection, gSchema,
+                            aSchema))
 
     connection.unbind_s()
     if not options.silent:
