@@ -43,6 +43,10 @@ def readableGrade(grade):
 def insertDelimiter(s, d='/'):
     # appends a delimiting string, d, onto a string, s, if
     # d is not already present at the end of s
+    # strips leading commas
+    if len(s) == 0:
+        if d[0] == ',':
+            return d[1:]
     if s[-len(d):] == d:
         return s
     return s + d
@@ -60,13 +64,10 @@ def path(classYear, schema, delimiter):
     if 'class' in structure:
         classOf = schema['class_prefix'] + str(classYear)
 
-    if delimiter[0] == ',':
-        p = delimiter[1:]
-    else:
-        p = delimiter
+    p = ''
 
     for element in structure:
-        p = insertDelimiter(delimiter)
+        p = insertDelimiter(p, delimiter)
         if element == 'division':
             p = p + div
         if element == 'grade':
@@ -86,7 +87,7 @@ def gOrg(classYear, gSchema):
 
 
 def adPath(classYear, aSchema):
-    base = aSchema['domain']
+    base = "," + aSchema['domain']
     if classYear.isdigit():
         return path(classYear, aSchema, ',ou=') + base
     else:

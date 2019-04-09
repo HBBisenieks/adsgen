@@ -33,14 +33,6 @@ def checkDuplicateAccount(connection, org, tempList, importID):
     return False
 
 
-def adOrg(classYear):
-    # return Active Directory Org
-    base = ",dc=headroyce,dc=org"
-    if classYear.isdigit():
-        return "ou=students" + base
-    return "ou=domainusers" + base
-
-
 def localDup(tempList, username):
     for row in tempList:
         if len(row) > 0:
@@ -93,7 +85,7 @@ def generateLine(row, tempList, connection, gSchema, aSchema):
     first = row[2]
     id = row[3]
     classYear = row[4]
-    org = adOrg(row[4], aSchema)
+    org = adPath(row[4], aSchema)
     addr = row[5]
     name = first + " " + last
     gDomain = gSchema['domain']
