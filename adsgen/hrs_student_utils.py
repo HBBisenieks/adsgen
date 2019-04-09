@@ -1,5 +1,3 @@
-from __future__ import print_function
-from builtins import str
 from datetime import date
 
 # A set of utilities for working with student data
@@ -18,6 +16,7 @@ def grade(classYear):
 
 def division(grade):
     # returns a string, Division, based on numeric grade
+    # TODO: implement configurable division names/boundaries
     if grade > 8:
         return "Upper"
     elif grade > 5:
@@ -42,45 +41,55 @@ def readableGrade(grade):
         return "Kingergarten"
 
 
-def studentOrg(classYear):
-    # takes a 4-digit year and returns a string
-    # for G Suite organizational units
+def insertDelimiter(s, d='/'):
+    # appends a delimiting string, d, onto a string, s, if
+    # d is not already present at the end of s
+    # strips leading commas
+    if len(s) == 0:
+        if d[0] == ',':
+            return d[1:]
+    if s[-len(d):] == d:
+        return s
+    return s + d
+
+
+def path(classYear, schema, delimiter):
+    # generalized method for returning an LDAP/Google path
+    # given a class year, schema, and delimiter
+    structure = schema['student_sub_structure'].split(',')
     g = grade(classYear)
-    d = division(g)
-    r = readableGrade(g)
-    org = "/Student/" + d + "/" + r + "/ClassOf" + str(classYear)
-    return org
+    if 'division' in structure:
+        div = division(g)
+    if 'grade' in structure:
+        rGrade = readableGrade(g)
+    if 'class' in structure:
+        classOf = schema['class_prefix'] + str(classYear)
+
+    p = ''
+
+    for element in structure:
+        p = insertDelimiter(p, delimiter)
+        if element == 'division':
+            p = p + div
+        if element == 'grade':
+            p = p + rGrade
+        if element == 'class':
+            p = p + classOf
+    return p
 
 
-def studentPath(classYear):
-    # takes a 4-digit year and returns a valid
-    # ldap path
-    g = grade(classYear)
-    d = division(g)
-    r = readableGrade(g)
-    y = str(classYear)
-    path = "ou=ClassOf" + y + ",ou=" + r + ",ou=" + d + ",ou=Students"
-    return path
-
-
-def gOrg(classYear):
+def gOrg(classYear, gSchema):
     if classYear.isdigit():
-        return studentOrg(classYear)
+        return path(classYear, gSchema, '/')
     else:
-        if classYear[0].upper() == 'F':
-            return "/Staff/Faculty"
-        elif classYear[0].upper() == 'A':
-            if classYear[1].upper() == 'S':
-                return "/Staff/ASP"
-            else:
-                return "/Staff/School-Admin"
-        else:
-            return "/Staff"
+        for div in gSchema['employee_sub'].split(','):
+            if classYear[:2].upper() == div[:2].upper():
+                return '/' + gSchema['employee_base'] + '/' + div
 
 
-def adPath(classYear):
-    base = ",dc=headroyce,dc=org"
+def adPath(classYear, aSchema):
+    base = "," + aSchema['domain']
     if classYear.isdigit():
-        return studentPath(classYear) + base
+        return path(classYear, aSchema, ',ou=') + base
     else:
-        return "ou=DomainUsers" + base
+        return aSchema['employee_base'] + base

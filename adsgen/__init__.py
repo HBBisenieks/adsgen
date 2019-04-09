@@ -1,22 +1,18 @@
-from __future__ import print_function
-from future import standard_library
-from builtins import next
-from builtins import str
+
 import ldap
 import sys
 import csv
 import argparse
 import configparser
-import io
 from datetime import date
 from adsgen.decode import sane
 from adsgen.hrs_student_utils import gOrg
 from adsgen.hrs_student_utils import adPath
 from adsgen.hrs_pw import hrspw
-standard_library.install_aliases()
 
 
 def bind(server, username, password):
+    # Bind to LDAP server
     ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, 0)
     connection = ldap.initialize(server)
     connection.simple_bind_s(username, password)
@@ -24,10 +20,14 @@ def bind(server, username, password):
 
 
 def lsearch(connection, org, query):
+    # Search LDAP OU using specified query
     return connection.search_s(org, ldap.SCOPE_SUBTREE, query)
 
 
 def checkDuplicateAccount(connection, org, tempList, importID):
+    # Check for duplicate accounts both on remote LDAP server
+    # and in local list of already-generated users. Duplicates
+    # are keyed off of custom ImportID attribute
     for row in tempList:
         if len(row) > 0:
             if row[0] == importID:
@@ -38,15 +38,8 @@ def checkDuplicateAccount(connection, org, tempList, importID):
     return False
 
 
-def adOrg(classYear):
-    # return Active Directory Org
-    base = ",dc=headroyce,dc=org"
-    if classYear.isdigit():
-        return "ou=students" + base
-    return "ou=domainusers" + base
-
-
 def localDup(tempList, username):
+    # Checks local temporary list for duplicate username
     for row in tempList:
         if len(row) > 0:
             if row[5] == username:
@@ -55,11 +48,18 @@ def localDup(tempList, username):
 
 
 def duplicateUsername(username, connection, org, tempList):
+    # Checks both LDAP and local list for duplicate username
     query = "(samaccountname=" + username + ")"
     return (lsearch(connection, org, query) or localDup(tempList, username))
 
 
 def checkCollision(connection, tempList, first, last, classYear, org):
+    # Checks for username collisions and attempts to resolve
+    # any collisions found by adding letters from first name
+    # for employees or last name for students to username.
+    # Prints a warning to STDOUT if collisions are found.
+    # Sanitizes names of Unicode characters that might otherwise
+    # break the system if present in usernames.
     lFirst = sane(first.lower())
     lLast = sane(last.lower())
     collision = False
@@ -88,7 +88,7 @@ def checkCollision(connection, tempList, first, last, classYear, org):
     return username
 
 
-def generateLine(row, tempList, connection):
+def generateLine(row, tempList, connection, gSchema, aSchema):
     # Row is: ImportID,Last,First,ID,ClassYear,AddrImportID
     # Returns a list in the form: ImportID,Surname,GivenName,Name,StudId,
     # SamAccountName,Password,ADDR-ImportID,ContactType,Email,Path,Org
@@ -98,17 +98,18 @@ def generateLine(row, tempList, connection):
     first = row[2]
     id = row[3]
     classYear = row[4]
-    org = adOrg(row[4])
+    org = adPath(row[4], aSchema)
     addr = row[5]
     name = first + " " + last
+    gDomain = gSchema['domain']
     if checkDuplicateAccount(connection, org, tempList, importID):
         print("Duplicate found for " + name + " with Import ID " + importID)
     else:
         username = checkCollision(connection, tempList, first, last, classYear,
                                   org)
-        email = username + "@headroyce.org"
-        org = gOrg(classYear)
-        path = adPath(classYear)
+        email = username + gDomain
+        org = gOrg(classYear, gSchema)
+        path = adPath(classYear, aSchema)
         password = hrspw(2, 1)
         line = [importID, last, first, name, id, username, password, addr,
                 "E-Mail", email, path, org]
@@ -117,6 +118,7 @@ def generateLine(row, tempList, connection):
 
 
 def generateHeader():
+    # Generates header row for CSV file
     header = ["ImportID", "Surname", "GivenName", "Name", "StudId",
               "SamAccountName", "Password", "ADDR-ImportID", "ContactType",
               "Email", "Path", "Org"]
@@ -124,6 +126,7 @@ def generateHeader():
 
 
 def handleArguments(args):
+    # Handles command-line arguments
     description = """Takes a CSV export from Blackbaud in the form ImportID,
                     Last,First,StudentID,ClassYear,Address-ImportID, santizes
                      data to the best of its ability and creates a CSV of user
@@ -157,32 +160,38 @@ def handleArguments(args):
 
 
 def fileName(outfile):
+    # Automatically generates a date-stamped file name
+    # conforming to ISO 8601 (YYYY-MM-DD) if a custom
+    # file name is not specified
     if outfile:
         return outfile
     return date.today().isoformat() + '-new-users.csv'
 
 
 def parseConfig():
-    with open("/etc/adsgen.cfg") as f:
-        cf = f.read()
-
-    config = configparser.RawConfigParser(allow_no_value=True)
-    config.readfp(io.BytesIO(cf))
+    # Parse config file stored at /etc/adsgen.cfg
+    # returns LDAP address and credentials and
+    # schema information for AD and Google domains
+    config = configparser.ConfigParser()
+    config.read('/etc/adsgen.cfg')
 
     s = config.get('server', 'address')
     u = config.get('server', 'username')
     p = config.get('server', 'password')
+    gSchema = config['google']
+    aSchema = config['ad']
 
-    if not s and u and p:
+    if not s and u and p and gSchema and aSchema:
         print("""Invalid config. Please ensure that settings are correct in
             /etc/adsgen.cfg""")
         sys.exit(1)
     else:
-        return s, u, p
+        return s, u, p, gSchema, aSchema
 
 
 def main(args=None):
-    s, u, p = parseConfig()
+    # Goes
+    s, u, p, gSchema, aSchema = parseConfig()
 
     if args is None:
         args = sys.argv[1:]
@@ -197,7 +206,8 @@ def main(args=None):
         if not options.noheader:
             next(reader, None)
         for row in reader:
-            tempList.append(generateLine(row, tempList, connection))
+            tempList.append(generateLine(row, tempList, connection, gSchema,
+                            aSchema))
 
     connection.unbind_s()
     if not options.silent:
@@ -205,7 +215,7 @@ def main(args=None):
 
     if not options.nowrite:
         outfile = fileName(options.outfile)
-        with open(outfile, 'wb') as f:
+        with open(outfile, 'w') as f:
             writer = csv.writer(f)
             writer.writerows(tempList)
 
