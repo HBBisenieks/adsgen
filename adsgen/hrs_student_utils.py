@@ -16,6 +16,7 @@ def grade(classYear):
 
 def division(grade):
     # returns a string, Division, based on numeric grade
+    # TODO: implement configurable division names/boundaries
     if grade > 8:
         return "Upper"
     elif grade > 5:

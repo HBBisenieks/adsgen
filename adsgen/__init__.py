@@ -12,6 +12,7 @@ from adsgen.hrs_pw import hrspw
 
 
 def bind(server, username, password):
+    # Bind to LDAP server
     ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, 0)
     connection = ldap.initialize(server)
     connection.simple_bind_s(username, password)
@@ -19,10 +20,14 @@ def bind(server, username, password):
 
 
 def lsearch(connection, org, query):
+    # Search LDAP OU using specified query
     return connection.search_s(org, ldap.SCOPE_SUBTREE, query)
 
 
 def checkDuplicateAccount(connection, org, tempList, importID):
+    # Check for duplicate accounts both on remote LDAP server
+    # and in local list of already-generated users. Duplicates
+    # are keyed off of custom ImportID attribute
     for row in tempList:
         if len(row) > 0:
             if row[0] == importID:
@@ -34,6 +39,7 @@ def checkDuplicateAccount(connection, org, tempList, importID):
 
 
 def localDup(tempList, username):
+    # Checks local temporary list for duplicate username
     for row in tempList:
         if len(row) > 0:
             if row[5] == username:
@@ -42,11 +48,18 @@ def localDup(tempList, username):
 
 
 def duplicateUsername(username, connection, org, tempList):
+    # Checks both LDAP and local list for duplicate username
     query = "(samaccountname=" + username + ")"
     return (lsearch(connection, org, query) or localDup(tempList, username))
 
 
 def checkCollision(connection, tempList, first, last, classYear, org):
+    # Checks for username collisions and attempts to resolve
+    # any collisions found by adding letters from first name
+    # for employees or last name for students to username.
+    # Prints a warning to STDOUT if collisions are found.
+    # Sanitizes names of Unicode characters that might otherwise
+    # break the system if present in usernames.
     lFirst = sane(first.lower())
     lLast = sane(last.lower())
     collision = False
@@ -105,6 +118,7 @@ def generateLine(row, tempList, connection, gSchema, aSchema):
 
 
 def generateHeader():
+    # Generates header row for CSV file
     header = ["ImportID", "Surname", "GivenName", "Name", "StudId",
               "SamAccountName", "Password", "ADDR-ImportID", "ContactType",
               "Email", "Path", "Org"]
@@ -112,6 +126,7 @@ def generateHeader():
 
 
 def handleArguments(args):
+    # Handles command-line arguments
     description = """Takes a CSV export from Blackbaud in the form ImportID,
                     Last,First,StudentID,ClassYear,Address-ImportID, santizes
                      data to the best of its ability and creates a CSV of user
@@ -145,12 +160,18 @@ def handleArguments(args):
 
 
 def fileName(outfile):
+    # Automatically generates a date-stamped file name
+    # conforming to ISO 8601 (YYYY-MM-DD) if a custom
+    # file name is not specified
     if outfile:
         return outfile
     return date.today().isoformat() + '-new-users.csv'
 
 
 def parseConfig():
+    # Parse config file stored at /etc/adsgen.cfg
+    # returns LDAP address and credentials and
+    # schema information for AD and Google domains
     config = configparser.ConfigParser()
     config.read('/etc/adsgen.cfg')
 
@@ -169,6 +190,7 @@ def parseConfig():
 
 
 def main(args=None):
+    # Goes
     s, u, p, gSchema, aSchema = parseConfig()
 
     if args is None:

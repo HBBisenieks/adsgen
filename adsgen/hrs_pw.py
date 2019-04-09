@@ -4,12 +4,14 @@ SYMBOLS = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')']
 
 
 def insertSymbols(password):
+    # Inserts a symbol in place of an existing character
     char_l = list(password)
     char_l[random.choice(list(range(len(char_l))))] = random.choice(SYMBOLS)
     return ''.join(char_l)
 
 
 def hrspw(words=2, symbols=0, prefix='', postfix=''):
+    # Returns a diceware-style password
     wordList = ['Anna',
                 'ASP',
                 'Becks',
