@@ -66,7 +66,7 @@ def path(classYear, schema, delimiter, rollover=True):
     if 'class' in structure:
         classOf = schema['class_prefix'] + str(classYear)
 
-    p = schema['student_base']
+    p = ''
 
     for element in structure:
         p = insertDelimiter(p, delimiter)
@@ -81,7 +81,7 @@ def path(classYear, schema, delimiter, rollover=True):
 
 def gOrg(classYear, gSchema):
     if classYear.isdigit():
-        return path(classYear, gSchema, '/')
+        return '/' + gSchema['student_base'] + path(classYear, gSchema, '/')
     else:
         for div in gSchema['employee_sub'].split(','):
             if classYear[:2].upper() == div[:2].upper():
@@ -91,7 +91,8 @@ def gOrg(classYear, gSchema):
 def adPath(classYear, aSchema):
     base = "," + aSchema['domain']
     if classYear.isdigit():
-        return path(classYear, aSchema, ',ou=') + base
+        p = path(classYear, aSchema, ',ou=') + ',' + aSchema['student_base']
+        return p + base
     else:
         return aSchema['employee_base'] + base
 
