@@ -6,9 +6,10 @@ import argparse
 import configparser
 from datetime import date
 from adsgen.decode import sane
-from adsgen.hrs_student_utils import gOrg
-from adsgen.hrs_student_utils import adPath
-from adsgen.hrs_pw import hrspw
+from adsgen.utils import gOrg
+from adsgen.utils import adPath
+from adsgen.utils import promoteAccounts
+from adsgen.hrspw import hrspw
 
 
 def bind(server, username, password):
@@ -187,6 +188,15 @@ def parseConfig():
         sys.exit(1)
     else:
         return s, u, p, gSchema, aSchema
+
+
+def promote():
+    s, u, p, gSchema, aSchema = parseConfig()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dryrun', action="store_true", help="""Displays
+                        commands to be run but does not run them.""")
+    options = parser.parse_args()
+    promoteAccounts(gSchema, options.dryrun)
 
 
 def main(args=None):
