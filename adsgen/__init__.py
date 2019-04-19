@@ -22,6 +22,7 @@ def bind(server, username, password):
 
 def lsearch(connection, org, query):
     # Search LDAP OU using specified query
+    # print("Searching " + query + " in " + org)
     return connection.search_s(org, ldap.SCOPE_SUBTREE, query)
 
 

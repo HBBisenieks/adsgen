@@ -39,7 +39,7 @@ def readableGrade(grade):
     elif grade == 1:
         return "1st"
     else:
-        return "Kingergarten"
+        return "Kindergarten"
 
 
 def insertDelimiter(s, d='/'):
