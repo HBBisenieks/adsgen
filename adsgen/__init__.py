@@ -109,7 +109,7 @@ def generateLine(row, tempList, connection, gSchema, aSchema):
     else:
         username = checkCollision(connection, tempList, first, last, classYear,
                                   org)
-        email = username + gDomain
+        email = username + '@' + gDomain
         org = gOrg(classYear, gSchema)
         path = adPath(classYear, aSchema)
         password = hrspw(2, 1)
