@@ -142,7 +142,9 @@ def handleArguments(args):
     parser.add_argument("infile", type=str, help="""CSV input file - fields must
                         be in order: ImportID,Last,First,StudentID,ClassYear,
                         Address-ImportID (ClassYear is either a 4-digit integer
-                         for students or FAC|STAFF|ADMIN for employees)""")
+                        for students or one of the configured affiliations
+                        corresponding with organizational units for
+                        employees)""")
     parser.add_argument('-o', '--outfile', default='', type=str, help="""Path to
                         output file. If -o is not specified, output file will
                         be named [DATE]-new-users.csv where [DATE] is the
